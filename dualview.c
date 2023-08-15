@@ -45,3 +45,38 @@ struct box_props {
 	unsigned int border_style : 2;
 	unsigned int : 2;
 };
+
+union Views {	//把数据看做结构或unsigned short类型的变量
+	struct box_props st_view;
+	unsigned short us_view;
+};
+
+void show_settings(const struct box_props* pb);
+void show_settings1(unsigned short);
+char* itobs(int n, char* ps);
+
+int main(void) {
+	/* 创建Views联合，并初始化initialize struct box view */
+	union Views box = { {truem YELLOW, true, GREEN, DASHED} };
+	char bin_str[8 * sizeof(unsigned int) + 1];
+
+	printf("Original box settings:\n");
+	show_settings(&box.st_view);
+	printf("\nBox settings using unsigned int view:\n");
+	show_settings1(box.us_view);
+
+	printf("bits are %s\n", itobs(box.us_view, bin_str));
+	box.us_view &= ~FILL_MASK;							//把表示填充色的位清0
+	box.us_view |= (FILL_BLUE | FILL_GREEN);		//重置填充色
+	box.us_view ^= OPAQUE;									//切换是否透明的位
+	box.us_view |= BORDER_RED;							//错误的方法
+	box.us_view &= ~STYLE_MASK;						//把样式的位清0
+	box.us_view |= B_DOTTED;								//把样式设置为点
+	printf("\nModified box settings:\n");
+	show_settings(&box.st_view);
+	printf("\nBox settings using unsigned int view:\n");
+	show_settings1(box.us_view);
+	printf("bits are %s\n", itobs(box.us_view, bin_str));
+
+	return 0;
+}
